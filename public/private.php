@@ -2,7 +2,6 @@
 
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
-use Symfony\Component\Yaml\Yaml;
 
 // activation du système d'autoloading de Composer
 require __DIR__.'/../vendor/autoload.php';
