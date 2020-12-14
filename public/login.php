@@ -26,31 +26,45 @@ $twig->AddExtension(new DebugExtension());
 // traitement des données 
 $config = Yaml::parseFile(__DIR__.'/../config/config.yaml');
 $data = [
-    'password' => '',
     'login' => '',
+    'password' => '',
 ];
 $errors = [];
 
-dump($_POST);
-dump($data);
-
 if ($_POST) {
-    foreach($data as $key => $value){
-        if(isset($_POST[$key])) {
+    foreach ($data as $key => $value){
+        if (isset($_POST[$key])) {
             $data[$key] = $_POST[$key];
         }
     }
-    $data['password'] = 'cok';
-    if (empty($_POST['login'])) {
+    if (empty($data['login'])) {
         $errors['login'] = 'Veuillez rentrer votre login';
+    } elseif ($data['login'] != $config['login']) {
+        $errors['login'] = 'Un ou les deux identifiants sont incorrects';
+        $errors['password'] = 'Un ou les deux identifiants sont incorrects';
     }
 
-    if (empty($_POST['password'])) {
+    if (empty($data['password'])) {
         $errors['password'] = 'Veuillez rentrer votre mot de passe';
+    } elseif (!password_verify($data['password'], $config['password'])) {
+        $errors['login'] = 'Un ou les deux identifiants sont incorrects';
+        $errors['password'] = 'Un ou les deux identifiants sont incorrects';
+    } 
+
+    if (empty($errors)) {
+        $_SESSION['login'] = $data['login'];
+        $_SESSION['password'] = $data['password'];
+
+        //redirection vers la page private.php
+        $url = 'private.php';
+        header("location: {$url}", true, 200);
+        exit();
     }
 }
 
-
+dump($_POST);
+dump($_SESSION);
+dump($errors);
 // affichage du rendu d'un template
 echo $twig->render('login.html.twig', [
     // transmission de données au template
@@ -58,10 +72,8 @@ echo $twig->render('login.html.twig', [
     'data' => $data,
 ]);
 
-
-
-// style avec bootstrap
-// validation de form d'authentification
+// style avec bootstrap OK
+// validation de form d'authentification ON GOING
 // si l'utilisateur est correctement authentifié :
 // - son login et son password sont copiés dans la variable de session
 // - il est redirigé vers la pahe private.php 
